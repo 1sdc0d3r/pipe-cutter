@@ -1,6 +1,6 @@
 
 # Online Python - IDE, Editor, Compiler, Interpreter
-pipe_cuts = {3: 5, 5: 3, 7: 4, 13: 2, 15: 2}
+pipe_cuts = {3.75: 5, 5: 3, 7: 4, 13: 2, 15: 2}
 
 
 def cutter():
@@ -12,6 +12,7 @@ def cutter():
     for pipe in pipe_cuts:  # pipe = length of pipe required
         for pipe2 in pipe_cuts:
             while pipe_cuts[pipe] > 0:
+                print(pipe_cuts[pipe])
                 if pipe+pipe2 == pipe_length_standard:
                     pipes_required += 1
                     pipe_cuts[pipe] -= 1
