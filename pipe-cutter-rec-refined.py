@@ -3,25 +3,21 @@ from time import time
 # todo valid_combo_reducer -> check max number of cuts allowed for tolerance
 # multiple pipe lengths available (run combination's on each and put together)
 
-# pipe_cuts = [3, 3, 3, 3, 3, 5, 5, 5, 7, 7, 7, 7, 13, 13, 15, 15]
 
-pipe_cuts_dict = {3: 5, 5: 3, 7: 4, 13: 2, 15: 2}
+test_dict1 = {3: 5, 5: 4, 7: 4, 13: 2, 15: 2}
+test_dict2 = {3: 15, 5: 20, 7: 42, 13: 20, 15: 50}
+
+pipe_cuts_dict = test_dict1
 cur_full_pipe_length = 20
 # * With multiple lengths find all combos that can work for either one, combine them, remove duplicates, then find combo of combos
 
 
 #! extract all cuts from dict into a list
-def get_cuts(pipe_cuts_dic): return [
+def extract_cuts_dict_list(pipe_cuts_dic): return [
     pipe for pipe in pipe_cuts_dic for i in range(pipe_cuts_dic[pipe])]
-# needed_cuts = []
-# for pipe in pipe_cuts_dic:
-#     for i in range(pipe_cuts_dic[pipe]):
-#         needed_cuts.append(pipe)
-# return needed_cuts
 
 
-pipe_cuts = get_cuts(pipe_cuts_dict)
-# print("pipe cuts: ", pipe_cuts)
+pipe_cuts = extract_cuts_dict_list(pipe_cuts_dict)
 
 
 rec_result = []  # used for recursion
@@ -36,7 +32,7 @@ def find_combinations_rec(target, current_sum, start, output, result=[]):
     if len(result) and sorted_result not in output:
         output.append(sorted_result)
 
-    for i in pipe_cuts:
+    for i in extract_cuts_dict_list(pipe_cuts_dict):
         temp_sum = current_sum + i
         if temp_sum <= target:
             result.append(i)
@@ -78,7 +74,7 @@ def leftover_dict_length(cut_dic, combo_list):
                 # just in case a invalid combo gets sent in - bugs happen (do I need to return if a combo doesn't work? validator should have caught it if not)
                 pass
 
-    return sum(get_cuts(cut_dict))
+    return sum(extract_cuts_dict_list(cut_dict))
 
 
 def combos_list_leftover_pipe(combo_list):
@@ -118,11 +114,9 @@ def find_best_combo_of_combos(cut_dict, combo_list):
     # cur_combo = []
 
     for i in range(len(combo_list)):
+        print(i)
         cur_combo_index += i
-        # while(leftover_dict_length(cur_combo_list) - combos_list_leftover_pipe(cur_combo_list)):  # this works...kinda
         while True:
-            # print(lowest_pipe_length)
-            # print(cur_combo_list)
             if combo_still_valid(
                     cur_pipe_cuts_dict, combo_list[cur_combo_index]):
                 # print(f'valid: {combo_list[cur_combo_index]}')
@@ -131,6 +125,7 @@ def find_best_combo_of_combos(cut_dict, combo_list):
                     if cur_pipe_cuts_dict[cut] > 0:
                         cur_pipe_cuts_dict[cut] -= 1
             elif cur_combo_index+1 < len(combo_list):
+                # print(i, cur_combo_index)
                 cur_combo_index += 1
             else:  # does this need to be outside the while loop?
                 cur_leftover_pipe = combos_list_leftover_pipe(
@@ -138,13 +133,14 @@ def find_best_combo_of_combos(cut_dict, combo_list):
                 cut_dict_empty = leftover_dict_length(
                     cur_pipe_cuts_dict, cur_combo_list) == 0
                 # print("cur", cur_combo_list)
-                if lowest_pipe_length == None or cur_leftover_pipe < lowest_pipe_length and cut_dict_empty:
+
+                if (lowest_pipe_length == None or cur_leftover_pipe < lowest_pipe_length) and cut_dict_empty:
                     lowest_pipe_length = cur_leftover_pipe
                     lowest_combo_list = cur_combo_list
                 cur_combo_index = 0
                 cur_combo_list = []
                 cur_pipe_cuts_dict = cut_dict.copy()
-                break  # * out of while loop
+                break  # * While loop
 
     # print("needed", cur_pipe_cuts_dict)
     print(f'low_combo: {lowest_combo_list} low_length: {lowest_pipe_length}')
