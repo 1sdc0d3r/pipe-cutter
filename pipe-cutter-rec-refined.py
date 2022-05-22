@@ -1,3 +1,5 @@
+from ast import comprehension
+from time import time
 # todo valid_combo_reducer -> check max number of cuts allowed for tolerance
 # multiple pipe lengths available (run combination's on each and put together)
 
@@ -10,6 +12,7 @@ full_pipe_length = 20
 
 #! extract all cuts from dict into a list
 def get_cuts(pipe_cuts_dic):
+
     needed_cuts = []
     for pipe in pipe_cuts_dic:
         for i in range(pipe_cuts_dic[pipe]):
@@ -18,17 +21,22 @@ def get_cuts(pipe_cuts_dic):
     return needed_cuts
 
 
+# ? Why do I have to convert this to a dict if it already is a dictionary
 pipe_cuts = get_cuts(dict(pipe_cuts_dict))
 # print("pipe cuts: ", pipe_cuts)
 
-all_combos = []
+
+rec_result = []  # used for recursion
+rec_combos = []  # All combos
 
 
-def find_combinations_rec(target, current_sum, start, output, result):
+def find_combinations_rec(target, current_sum, start, output, result=[]):
     # if current_sum == target: #* Perfect combos only -> append to output
 
-    if len(result.copy()):  # * This is needed for first recursion only []
-        output.append(result.copy())
+    # * DRY and ran once
+    sorted_result = sorted(result)
+    if len(result) and sorted_result not in output:
+        output.append(sorted_result)
 
     for i in pipe_cuts:
         temp_sum = current_sum + i
@@ -40,63 +48,25 @@ def find_combinations_rec(target, current_sum, start, output, result):
             return
 
 
-#! Attempting to modulize to separate functionality
-# def get_all_combinations(target):
-#     output = []
-#     result = []
-#     find_combinations_rec(target, 0, 1, output, result)
-#     return len(output)
+find_combinations_rec(full_pipe_length, 0, 1, rec_combos, rec_result)
+print(f'Total: {len(rec_combos)}')
 
 
-# print(get_all_combinations(full_pipe_length))
-
-
-# * sort function here then reduce, faster than sorting in every recursion
-def all_combinations_reduced(target):
-    output = []
-    result = []
-    find_combinations_rec(target, 0, 1, output, result)
-    output_reduced = []
-    # output_reduced_computation = [x for x in output if x not in output_reduced_computation]
-
-    for x in output:
-        list.sort(x)
-        if x not in output_reduced:
-            output_reduced.append(x)
-
-    print(len(output_reduced))
-    return output_reduced
-
-
-res2 = all_combinations_reduced(full_pipe_length)
-# print(res2)
-
-
-def valid_combo_reducer(pipe_cuts_dict, pipe_cuts_com):
-    for combo in pipe_cuts_com:
+#! Filter combos that would not work based on cuts needed
+def valid_combo_reducer(pipe_cuts_dict, cut_combos):
+    for combo in cut_combos:
         cuts_copy = pipe_cuts_dict.copy()
         for x in combo:
             if cuts_copy[x] > 0:
                 cuts_copy[x] -= 1
             else:
-                pipe_cuts_com.remove(combo)
+                cut_combos.remove(combo)
                 break
-    return pipe_cuts_com
+    return cut_combos
 
 
-valid_combos = valid_combo_reducer(pipe_cuts_dict, res2)
-# print("valid combos:", valid_combos, f'Len: {len(valid_combos)}')
-
-
-#!!!!!!!!!!
-all_combos.sort()  # * Human view -- Dupes/No-Dupes: 131/40 combos
-# print(f"ALL: {all_combos} - len: {len(all_combos)}")
-all_valid_combos = valid_combo_reducer(
-    pipe_cuts_dict, all_combos)  # * 37 valid combos
-# print(all_valid_combos, f'ALL: {len(all_valid_combos)}')
-#!!!!!!!!!!
-
-# From the all_valid_combos can I find combos with least amount of waste. See what combos of combos would result in the min amount of pipe?
+valid_combos = valid_combo_reducer(pipe_cuts_dict, rec_combos)
+print(f'Valid: {len(valid_combos)}')
 
 
 def leftover_pipe_length(combo_list):
@@ -162,7 +132,7 @@ def find_best_combo_of_combos(cut_dict, combo_list):
 # what about combo1 maxing out, then combo 2 until 0 cuts needed left, then pop off last one and find next combo then pop 2 off all the way to empty then start on combo2 maxing out??
 
 
-find_best_combo_of_combos(pipe_cuts_dict, all_valid_combos)
+# find_best_combo_of_combos(pipe_cuts_dict, all_valid_combos)
 
 # combo_matrix [[[3, 3, 3, 3, 3], [5, 5, 5]...],[3, 3, 3, 3, 5], [3, 5, 5]...]]
 # [[combo1, combo1, combo2], [combo1, combo2, combo7]]
