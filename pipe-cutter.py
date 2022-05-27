@@ -1,12 +1,12 @@
-from time import time
+from time import clock_getres, time
 # todo validate_combo -> check max number of cuts allowed for tolerance
 # multiple pipe lengths available (run combination's on each and put together)
 
 
 test_dict1 = {3: 5, 5: 4, 7: 4, 13: 2, 15: 2}
-test_dict2 = {3: 15, 5: 20, 7: 22, 13: 20, 15: 8}  # total: 
+test_dict2 = {3: 15, 5: 20, 7: 22, 13: 20, 15: 8}  # total:
 
-pipe_cuts_dict = test_dict2
+pipe_cuts_dict = test_dict1
 cur_full_pipe_length = 20
 # * With multiple lengths find all combos that can work for either one, combine them, remove duplicates, then find combo of combos
 
@@ -53,24 +53,34 @@ rec_combos = []  # All combos
 def find_combinations_rec(target, current_sum, start, output, result):
     # if current_sum == target: #* Perfect combos only -> append to output
 
-    # * sorted function - DRY and runs once
+    # * sorted function - DRY and runs once per recursion
     sorted_result = sorted(result)
-    # * checks if combo is valid and not in output
-    if len(result) and sorted_result not in output and validate_combo(pipe_cuts_dict, result):
-        output.append(sorted_result)
 
-    for i in extract_cuts_list(pipe_cuts_dict):
-        temp_sum = current_sum + i
+    # * checks if combo is valid and not in output
+    # print(sorted_result in output)
+    # print(output)
+    # print(validate_combo(pipe_cuts_dict, result))
+    # print(sorted_result in output)
+
+    if len(result) and sorted_result not in output and validate_combo(pipe_cuts_dict, result):
+        # print(sorted_result)
+        output.append(sorted_result)
+        # print("out", output)
+
+    for cut in extract_cuts_list(pipe_cuts_dict):
+        temp_sum = current_sum + cut
         if temp_sum <= target:
-            result.append(i)
-            find_combinations_rec(target, temp_sum, i, output, result)
+            result.append(cut)
+            print("result", result, "output", output)
+            find_combinations_rec(target, temp_sum, cut, output, result)
+            # print(result)
             result.pop()
         else:
             return
 
 
 find_combinations_rec(cur_full_pipe_length, 0, 1, rec_combos, rec_result)
-# print(f'Total: {len(rec_combos)}')
+print(f'Total: {len(rec_combos)}')
 
 
 #! low_combo is filling up with smaller combos then not allowing the next combos in.
@@ -124,7 +134,7 @@ def find_best_combo_of_combos(cut_dict, combo_list):
     print(f'low_combo: {lowest_combo_list} low_length: {lowest_pipe_length}')
 
 
-find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
+#! find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
 
 # check combo if still valid
 # add combo to cur_combo_list
