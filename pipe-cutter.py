@@ -5,6 +5,7 @@ from time import clock_getres, time
 
 test_dict1 = {3: 5, 5: 4, 7: 4, 13: 2, 15: 2}
 test_dict2 = {3: 15, 5: 20, 7: 22, 13: 20, 15: 8}  # total:
+test_dict3 = {3: 5, 5: 4, 7: 3, 13: 2, 15: 1}  # total: 40
 
 pipe_cuts_dict = test_dict1
 cur_full_pipe_length = 20
@@ -48,11 +49,10 @@ def combos_leftover_pipe(combo_list):
 
 rec_result = []  # used for recursion
 rec_combos = []  # All combos
+perfect_combos = []
 
 
 def find_combinations_rec(target, current_sum, start, output, result):
-    # if current_sum == target: #* Perfect combos only -> append to output
-
     # * sorted function - DRY and runs once per recursion
     sorted_result = sorted(result)
 
@@ -67,11 +67,14 @@ def find_combinations_rec(target, current_sum, start, output, result):
         output.append(sorted_result)
         # print("out", output)
 
+        #* Perfect combos only -> append to output
+        if current_sum == target: perfect_combos.append(sorted_result);
+
     for cut in extract_cuts_list(pipe_cuts_dict):
         temp_sum = current_sum + cut
         if temp_sum <= target:
             result.append(cut)
-            print("result", result, "output", output)
+            # print("result", result, "output", output)
             find_combinations_rec(target, temp_sum, cut, output, result)
             # print(result)
             result.pop()
@@ -81,10 +84,12 @@ def find_combinations_rec(target, current_sum, start, output, result):
 
 find_combinations_rec(cur_full_pipe_length, 0, 1, rec_combos, rec_result)
 print(f'Total: {len(rec_combos)}')
+# print(rec_combos)
+# print(perfect_combos)
 
 
 #! low_combo is filling up with smaller combos then not allowing the next combos in.
-# ? matrix of combos∆¸˛Ç
+# ? matrix of combos
 def find_best_combo_of_combos(cut_dict, combo_list):
     lowest_combo_list = []
     lowest_pipe_length = None
@@ -98,7 +103,7 @@ def find_best_combo_of_combos(cut_dict, combo_list):
 
     for i in range(len(combo_list)):
         cur_combo_index += i
-        print(i)
+        # print(i)
         # cur_combo_index_modifier += 1
         # print(i, cur_combo_index_modifier)
         # cur_leftover_pipe = 0
@@ -130,11 +135,12 @@ def find_best_combo_of_combos(cut_dict, combo_list):
                 cur_pipe_cuts_dict = cut_dict.copy()
                 break  # * While loop
 
-    # print("needed", cur_pipe_cuts_dict)
+    print("needed", cur_pipe_cuts_dict)
     print(f'low_combo: {lowest_combo_list} low_length: {lowest_pipe_length}')
+    # print(pipe_cuts_dict)
 
 
-#! find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
+find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
 
 # check combo if still valid
 # add combo to cur_combo_list

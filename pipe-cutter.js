@@ -63,6 +63,7 @@ function check_obj_empty(pipe_cuts_obj, combo_list) {
 
 const rec_result = [] //* used for recursion
 const rec_combos = [] //* All combos
+const cut_arr = extract_cuts_arr(pipe_cuts_obj);
 
 function find_combinations_rec(target, cur_sum, start, output, result) {
     result.sort((a, b) => a - b);
@@ -70,23 +71,19 @@ function find_combinations_rec(target, cur_sum, start, output, result) {
     // console.log(output.includes(result))
     // console.log(output, result)
     // console.log(validate_combo(pipe_cuts_obj, result))
-    // console.log(output.includes(result), {
-    //     output,
-    //     result
-    // })
-    // console.log(!output.includes(result))
-    console.log((result.length && !output.includes(result) && validate_combo(pipe_cuts_obj, result)))
+    // console.log((result.length && !output.includes(result) && validate_combo(pipe_cuts_obj, result)))
     if (result.length && !output.includes(result) && validate_combo(pipe_cuts_obj, result)) {
         //! output here is being set to result and not result not getting pushed in
         output.push(result)
     }
-    const cut_arr = extract_cuts_arr(pipe_cuts_obj);
+
     for (let i = 0; i < cut_arr.length; i++) {
         const cut = cut_arr[i];
         const temp_sum = cur_sum + cut;
         if (temp_sum <= target) {
+            console.log(result)
             result.push(cut);
-            console.log(output, result)
+            // console.log(output, result)
             find_combinations_rec(target, temp_sum, cut, output, result)
             result.pop()
         } else return;
