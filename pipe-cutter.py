@@ -1,12 +1,13 @@
-from time import clock_getres, time
+import time
+start_time = time.time()
 # todo validate_combo -> check max number of cuts allowed for tolerance
 # multiple pipe lengths available (run combination's on each and put together)
 
-test_dict1 = {3: 5, 5: 4, 7: 4, 13: 2, 15: 2}
+test_dict1 = {3: 5, 5: 4, 7: 4, 13: 2, 15: 2} # 21
 test_dict2 = {3: 15, 5: 20, 7: 22, 13: 20, 15: 8}  # total:
-test_dict3 = {3: 5, 5: 4, 7: 3, 13: 2, 15: 1}  # total: 40
+test_dict3 = {3: 5, 5: 4, 7: 3, 13: 2, 15: 1}  # total: 40 - 3
 
-pipe_cuts_dict = test_dict3
+pipe_cuts_dict = test_dict1
 cur_full_pipe_length = 20
 # * With multiple lengths find all combos that can work for either one, combine them, remove duplicates, then find combo of combos
 
@@ -46,31 +47,36 @@ def combos_leftover_pipe(combo_list):
     return leftover_pipe
 
 
-rec_result = []  # used for recursion
+# rec_result = []  # used for recursion
 rec_combos = []  # All combos
 perfect_combos = [] # Perfect cut combos
 
+extracted_cuts_list = extract_cuts_list(pipe_cuts_dict)
 
-def find_combinations_rec(target, current_sum, start, output, result):
+def find_combinations_rec(target, current_sum, start, output, result=[]):
     # * sorted function - DRY and runs once per recursion
     sorted_result = sorted(result)
+    # print(sorted_result)
 
     # * checks if combo is valid and not in output
     # print(sorted_result in output)
     # print(output)
     # print(validate_combo(pipe_cuts_dict, result))
     # print(sorted_result in output)
+    # print(result==sorted_result) 
 
-    if len(result) and sorted_result not in output and validate_combo(pipe_cuts_dict, result):
-        # print(sorted_result)
-        output.append(sorted_result)
-        # print("out", output)
+    if result and sorted_result not in output:
+        if  validate_combo(pipe_cuts_dict, result):
+            # print(sorted_result)
+            output.append(sorted_result)
+            # print("out", output)
 
-        #* Perfect combos only -> append to output
-        if current_sum == target: perfect_combos.append(sorted_result);
+            #* Perfect combos only -> append to output
+            if current_sum == target: perfect_combos.append(sorted_result);
 
-    for cut in extract_cuts_list(pipe_cuts_dict):
+    for cut in extracted_cuts_list:
         temp_sum = current_sum + cut
+
         if temp_sum <= target:
             result.append(cut)
             # print("result", result, "output", output)
@@ -81,8 +87,8 @@ def find_combinations_rec(target, current_sum, start, output, result):
             return
 
 
-find_combinations_rec(cur_full_pipe_length, 0, 1, rec_combos, rec_result)
-# print(f'Total: {len(rec_combos)}')
+find_combinations_rec(cur_full_pipe_length, 0, 1, rec_combos)
+print(f'Total: {len(rec_combos)}')
 # print(rec_combos)
 # print(perfect_combos)
 
@@ -139,7 +145,7 @@ def find_best_combo_of_combos(cut_dict, combo_list):
     # print(pipe_cuts_dict)
 
 
-find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
+# find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
 
 # check combo if still valid
 # add combo to cur_combo_list
@@ -164,16 +170,19 @@ find_best_combo_of_combos(pipe_cuts_dict, rec_combos)
 
 
 # use a node tree to map out all possible combinations then do searches on the tree to determine if it has a low amount oy waste. GONNA GIVE IT A TRY - dont do that, use the node tree to optimize getting cuts and combos maybe
+# print(perfect_combos)
 
 def best_combo_of_combos(cut_dict, combo_list):
     lowest_combo_list = []
     lowest_pipe_length = None
+    start_index=rec_combos.index(perfect_combos[0])
+    # print("test")
 
-    def rec_combo(cut_dict=cut_dict, cur_combo_list=[], cur_combo_index=0):
+    def rec_combo(cut_dict=cut_dict, cur_combo_list=[], cur_combo_index=start_index):
         nonlocal lowest_pipe_length, lowest_combo_list
-        cur_pipe_cuts_dict = cut_dict.copy()
+        cur_pipe_cuts_dict = cut_dict
         # cur_combo = []
-        cur_combo_list = cur_combo_list.copy()
+        cur_combo_list = cur_combo_list
         cur_combo_index = cur_combo_index
         cur_leftover_pipe = None
 
@@ -217,10 +226,15 @@ def best_combo_of_combos(cut_dict, combo_list):
 
     rec_combo()
     print("lowest list:", lowest_combo_list, lowest_pipe_length)
+    # return( lowest_combo_list, lowest_pipe_length)
     # print(lowest_pipe_length)
 
+print(time.time()-start_time)
+    # best_combo_of_combos(pipe_cuts_dict, rec_combos);
+# avgTime = 0
+# for i in range(5):
+    # avgTime+=time.time() - start_time
 
+# print(avgTime/5)
 
-
-best_combo_of_combos(pipe_cuts_dict, rec_combos)
 # what about using a dict for each combo and store the value as the leftover pipe from that combo
