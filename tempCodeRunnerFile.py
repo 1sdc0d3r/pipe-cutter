@@ -1,1 +1,3 @@
-for cut in extracted_cuts_list:
+ == len(combo_list): 
+        #     # print("max")
+        #     return
